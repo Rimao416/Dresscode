@@ -446,7 +446,7 @@ const LumeHomepage = () => {
             {/* Info entreprise */}
             <div>
               <div className="text-3xl font-bold text-gray-900 mb-6">
-                <span className="italic">L</span>UME
+                <span className="italic">D</span>RESSCODE
               </div>
               <p className="text-gray-600 mb-6">
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt.
@@ -458,7 +458,7 @@ const LumeHomepage = () => {
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-5 h-5 bg-gray-400 rounded"></div>
-                  <span className="text-gray-600">info@lume.com</span>
+                  <span className="text-gray-600">dresscode@example.com</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-5 h-5 bg-gray-400 rounded"></div>
