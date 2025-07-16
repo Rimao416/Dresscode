@@ -1,36 +1,233 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Structure complète d'un projet Next.js professionnel
 
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+my-nextjs-project/
+├── .env.local
+├── .env.example
+├── .gitignore
+├── .eslintrc.json
+├── .prettierrc
+├── .prettierignore
+├── next.config.js
+├── package.json
+├── README.md
+├── tailwind.config.js
+├── tsconfig.json
+├── postcss.config.js
+├── components.json (si shadcn/ui)
+│
+├── public/
+│   ├── icons/
+│   │   ├── favicon.ico
+│   │   ├── icon-192x192.png
+│   │   └── icon-512x512.png
+│   ├── images/
+│   │   ├── logo.png
+│   │   └── hero/
+│   └── manifest.json
+│
+├── src/
+│   ├── app/
+│   │   ├── (auth)/
+│   │   │   ├── login/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── loading.tsx
+│   │   │   ├── register/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── loading.tsx
+│   │   │   └── layout.tsx
+│   │   │
+│   │   ├── (dashboard)/
+│   │   │   ├── dashboard/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── loading.tsx
+│   │   │   │   └── error.tsx
+│   │   │   ├── settings/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── profile/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── security/
+│   │   │   │       └── page.tsx
+│   │   │   └── layout.tsx
+│   │   │
+│   │   ├── api/
+│   │   │   ├── auth/
+│   │   │   │   ├── login/
+│   │   │   │   │   └── route.ts
+│   │   │   │   ├── register/
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── logout/
+│   │   │   │       └── route.ts
+│   │   │   ├── users/
+│   │   │   │   ├── route.ts
+│   │   │   │   └── [id]/
+│   │   │   │       └── route.ts
+│   │   │   └── health/
+│   │   │       └── route.ts
+│   │   │
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   ├── loading.tsx
+│   │   ├── error.tsx
+│   │   ├── not-found.tsx
+│   │   └── template.tsx
+│   │
+│   ├── components/
+│   │   ├── ui/
+│   │   │   ├── button.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── card.tsx
+│   │   │   ├── modal.tsx
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── forms/
+│   │   │   ├── LoginForm.tsx
+│   │   │   ├── RegisterForm.tsx
+│   │   │   └── ContactForm.tsx
+│   │   │
+│   │   ├── layout/
+│   │   │   ├── Header.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   └── Navigation.tsx
+│   │   │
+│   │   ├── features/
+│   │   │   ├── auth/
+│   │   │   │   ├── AuthProvider.tsx
+│   │   │   │   └── LoginButton.tsx
+│   │   │   ├── dashboard/
+│   │   │   │   ├── DashboardStats.tsx
+│   │   │   │   └── DashboardChart.tsx
+│   │   │   └── profile/
+│   │   │       ├── ProfileCard.tsx
+│   │   │       └── ProfileForm.tsx
+│   │   │
+│   │   └── common/
+│   │       ├── Loading.tsx
+│   │       ├── ErrorBoundary.tsx
+│   │       └── SEO.tsx
+│   │
+│   ├── hooks/
+│   │   ├── useAuth.ts
+│   │   ├── useLocalStorage.ts
+│   │   ├── useDebounce.ts
+│   │   └── useApi.ts
+│   │
+│   ├── lib/
+│   │   ├── auth.ts
+│   │   ├── db.ts
+│   │   ├── utils.ts
+│   │   ├── validations.ts
+│   │   ├── constants.ts
+│   │   └── api.ts
+│   │
+│   ├── store/
+│   │   ├── index.ts
+│   │   ├── authSlice.ts
+│   │   ├── userSlice.ts
+│   │   └── providers.tsx
+│   │
+│   ├── types/
+│   │   ├── index.ts
+│   │   ├── auth.ts
+│   │   ├── user.ts
+│   │   └── api.ts
+│   │
+│   ├── styles/
+│   │   ├── globals.css
+│   │   └── components.css
+│   │
+│   └── middleware.ts
+│
+├── docs/
+│   ├── API.md
+│   ├── DEPLOYMENT.md
+│   └── CONTRIBUTING.md
+│
+├── tests/
+│   ├── __mocks__/
+│   ├── components/
+│   ├── pages/
+│   ├── utils/
+│   └── setup.ts
+│
+└── scripts/
+    ├── build.sh
+    ├── deploy.sh
+    └── seed.js
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Explication des dossiers principaux
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### `/src/app/` - App Router de Next.js 13+
+- **Route groups** : `(auth)`, `(dashboard)` pour organiser sans affecter l'URL
+- **Fichiers spéciaux** : `layout.tsx`, `page.tsx`, `loading.tsx`, `error.tsx`
+- **API Routes** : Dans `/api/` avec la nouvelle structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### `/src/components/` - Composants réutilisables
+- **`ui/`** : Composants UI de base (boutons, inputs, modals)
+- **`forms/`** : Formulaires spécifiques
+- **`layout/`** : Composants de mise en page
+- **`features/`** : Composants organisés par fonctionnalité
+- **`common/`** : Composants communs (Loading, Error, SEO)
 
-## Learn More
+### `/src/hooks/` - Hooks personnalisés
+- Logique réutilisable pour la gestion d'état et effets
 
-To learn more about Next.js, take a look at the following resources:
+### `/src/lib/` - Utilitaires et configurations
+- **`auth.ts`** : Configuration d'authentification
+- **`db.ts`** : Configuration base de données
+- **`utils.ts`** : Fonctions utilitaires
+- **`validations.ts`** : Schémas de validation (Zod, Yup)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### `/src/store/` - Gestion d'état globale
+- Redux Toolkit, Zustand, ou autre solution de state management
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### `/src/types/` - Types TypeScript
+- Définitions de types organisées par domaine
 
-## Deploy on Vercel
+### `/src/styles/` - Styles globaux
+- CSS/SCSS globaux et par composant
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Bonnes pratiques
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Nommage
+- **Composants** : PascalCase (`UserProfile.tsx`)
+- **Hooks** : camelCase avec préfixe `use` (`useAuth.ts`)
+- **Utilitaires** : camelCase (`formatDate.ts`)
+- **Types** : PascalCase (`User`, `ApiResponse`)
+
+### Organisation
+- **Colocation** : Grouper les fichiers liés ensemble
+- **Barrel exports** : Utiliser `index.ts` pour les exports
+- **Séparation des responsabilités** : Un composant = une responsabilité
+
+### Structure des composants
+```typescript
+// components/ui/Button.tsx
+import { forwardRef } from 'react'
+import { cn } from '@/lib/utils'
+
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'outline'
+  size?: 'sm' | 'md' | 'lg'
+}
+
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant = 'primary', size = 'md', ...props }, ref) => {
+    return (
+      <button
+        ref={ref}
+        className={cn(
+          'inline-flex items-center justify-center rounded-md font-medium',
+          className
+        )}
+        {...props}
+      />
+    )
+  }
+)
+```
+
+Cette structure garantit un projet professionnel, scalable et maintenable.
