@@ -8,6 +8,7 @@ interface FormFieldProps {
   required?: boolean;
   helpText?: string;
   className?: string;
+  htmlFor?: string
 }
 
 const FormField: React.FC<FormFieldProps> = ({ 
