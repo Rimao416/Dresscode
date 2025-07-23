@@ -115,15 +115,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   {isCollapsed ? <X size={20} /> : <Menu size={20} />}
                 </motion.div>
               </motion.button>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <h1 className={`text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent`}>
-                  Dashboard
-                </h1>
-              </motion.div>
             </div>
 
             {/* Center Section - Search */}

@@ -4,9 +4,10 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Category } from '@/types/category.type'
-import { categorySchema,CategoryFormData } from '@/schemas/category.schema'
+import { categorySchema, CategoryFormData } from '@/schemas/category.schema'
 import { useRootCategories } from '@/hooks/useRootCategories'
 import { useCategoryStore } from '@/store/categoryStore'
+import { useTheme } from '@/context/ThemeContext'
 import FormField from '../ui/formfield'
 import Input from '../ui/input'
 import Button from '../ui/button'
@@ -27,6 +28,7 @@ export default function CategoryForm({
 }: CategoryFormProps) {
   const { data: rootCategories = [], isLoading: isRootCategoriesLoading } = useRootCategories();
   const { categories } = useCategoryStore();
+  const { isDarkMode } = useTheme();
 
   const {
     register,
@@ -86,46 +88,67 @@ export default function CategoryForm({
   const availableCategories = getAvailableParentCategories();
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-      <FormField
-        label="Category name"
-        htmlFor="name"
-        error={errors.name?.message}
-      >
-        <Input
-          id="name"
-          placeholder="Enter category name"
-          {...register('name')}
-        />
-      </FormField>
-
-      <FormField
-        label="Parent Category"
-        htmlFor="parentId"
-        error={errors.parentId?.message}
-      >
-        <Select
-          id="parentId"
-          {...register("parentId")}
+    <div className={`p-6 rounded-xl transition-all duration-300 ${
+      isDarkMode 
+        ? 'bg-gray-800/50 border-gray-700' 
+        : 'bg-white/70 border-gray-200'
+    } border backdrop-blur-sm shadow-lg`}>
+      
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+        
+        {/* Category Name Field */}
+        <FormField
+          label="Category name"
+          htmlFor="name"
+          error={errors.name?.message}
+          required
         >
-          <option value="">No parent (Root category)</option>
-          {isRootCategoriesLoading ? (
-            <option disabled>Loading...</option>
-          ) : (
-            availableCategories.map(category => (
-              <option key={category.id} value={category.id}>
-                {category.parent ? `${category.parent.name} > ${category.name}` : category.name}
-              </option>
-            ))
-          )}
-        </Select>
-      </FormField>
+          <Input
+            id="name"
+            placeholder="Enter category name"
+            error={errors.name?.message}
+            {...register('name')}
+          />
+        </FormField>
 
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : submitButtonText}
-        </Button>
-      </div>
-    </form>
+        {/* Parent Category Field */}
+        <FormField
+          label="Parent Category"
+          htmlFor="parentId"
+          error={errors.parentId?.message}
+        >
+          <Select
+            id="parentId"
+            placeholder="Select parent category"
+            error={errors.parentId?.message}
+            {...register("parentId")}
+          >
+            <option value="">No parent (Root category)</option>
+            {isRootCategoriesLoading ? (
+              <option disabled>Loading...</option>
+            ) : (
+              availableCategories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.parent ? `${category.parent.name} > ${category.name}` : category.name}
+                </option>
+              ))
+            )}
+          </Select>
+        </FormField>
+
+        {/* Submit Button */}
+        <div className="flex justify-end pt-4">
+          <Button 
+            type="submit" 
+            variant="primary"
+            loading={isSubmitting}
+            disabled={isSubmitting}
+          >
+            {submitButtonText}
+          </Button>
+        </div>
+
+      </form>
+    </div>
   )
 }

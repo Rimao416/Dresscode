@@ -77,7 +77,7 @@ export default function AddCategoryPage() {
           title='Category management'
         />
 
-        <div className='bg-white rounded-lg p-6 shadow-sm'>
+        <div className=' rounded-lg p-6 shadow-sm'>
           <CategoryForm
             onSubmit={onSubmit}
             isSubmitting={isSubmitting}

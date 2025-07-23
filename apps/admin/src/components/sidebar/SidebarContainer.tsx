@@ -12,7 +12,6 @@ interface SidebarContainerProps {
 const SidebarContainer: React.FC<SidebarContainerProps> = ({
   children,
   isCollapsed = false,
-  onToggleCollapse
 }) => {
   const { isDarkMode } = useTheme();
 
@@ -37,26 +36,11 @@ const SidebarContainer: React.FC<SidebarContainerProps> = ({
             <span className={`ml-3 text-lg font-semibold truncate ${
               isDarkMode ? 'text-white' : 'text-gray-900'
             }`}>
-              DashCode
+              Dress Code
             </span>
           )}
         </div>
-        {onToggleCollapse && (
-          <button
-            onClick={onToggleCollapse}
-            className={`ml-auto p-1.5 rounded-lg transition-colors duration-200 ${
-              isDarkMode 
-                ? 'hover:bg-gray-700 text-gray-300' 
-                : 'hover:bg-gray-100 text-gray-600'
-            }`}
-          >
-            {isCollapsed ? (
-              <Menu className="h-5 w-5" />
-            ) : (
-              <X className="h-5 w-5" />
-            )}
-          </button>
-        )}
+    
       </div>
 
       {/* Navigation Sections */}

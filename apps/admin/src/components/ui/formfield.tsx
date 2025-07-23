@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
+import { useTheme } from '@/context/ThemeContext';
 
 interface FormFieldProps {
   children: React.ReactNode;
@@ -8,31 +9,54 @@ interface FormFieldProps {
   required?: boolean;
   helpText?: string;
   className?: string;
-  htmlFor?: string
+  htmlFor?: string;
 }
 
-const FormField: React.FC<FormFieldProps> = ({ 
+const FormField: React.FC<FormFieldProps> = ({
   children,
   label,
   error,
   required = false,
   helpText,
-  className = ''
+  className = '',
+  htmlFor
 }) => {
+  const { isDarkMode } = useTheme();
+
   return (
-    <div className={`${className}`}>
+    <div className={`space-y-2 ${className}`}>
       {label && (
-        <label className="block text-sm font-semibold text-gray-700">
+        <label 
+          htmlFor={htmlFor}
+          className={`block text-sm font-semibold transition-colors ${
+            isDarkMode ? 'text-gray-200' : 'text-gray-700'
+          }`}
+        >
           {label}
-          {required && <span className="text-red-800 ml-1">*</span>}
+          {required && (
+            <span className={`ml-1 ${
+              isDarkMode ? 'text-red-400' : 'text-red-800'
+            }`}>
+              *
+            </span>
+          )}
         </label>
       )}
+      
       {children}
+      
       {helpText && !error && (
-        <p className="text-sm text-gray-500">{helpText}</p>
+        <p className={`text-sm transition-colors ${
+          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+        }`}>
+          {helpText}
+        </p>
       )}
+      
       {error && (
-        <p className="text-sm text-red-600 flex items-center gap-1">
+        <p className={`text-sm flex items-center gap-1 transition-colors ${
+          isDarkMode ? 'text-red-400' : 'text-red-600'
+        }`}>
           <AlertCircle size={14} />
           {error}
         </p>
