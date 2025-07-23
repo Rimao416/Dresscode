@@ -24,7 +24,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
   
   const isActive = activeItem === item.path ||
     (item.submenu && item.submenu.some(sub => activeItem === sub.path));
-  const isExpanded = expandedSections[item.name];
+  const isExpanded = expandedSections[item.name] || false; // Ajout de || false
 
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -92,9 +92,9 @@ const MenuItem: React.FC<MenuItemProps> = ({
       <div>
         <button
           onClick={handleToggle}
-          className={getButtonClasses(isActive)}
+          className={getButtonClasses(Boolean(isActive))} // Utilisation de Boolean()
         >
-          <item.icon className={getIconClasses(isActive)} />
+          <item.icon className={getIconClasses(Boolean(isActive))} /> {/* Utilisation de Boolean() */}
           {!isCollapsed && (
             <>
               <span className="flex-1 text-left">{item.name}</span>
@@ -139,9 +139,9 @@ const MenuItem: React.FC<MenuItemProps> = ({
     <div>
       <Link
         href={item.path}
-        className={getButtonClasses(isActive)}
+        className={getButtonClasses(Boolean(isActive))} // Utilisation de Boolean()
       >
-        <item.icon className={getIconClasses(isActive)} />
+        <item.icon className={getIconClasses(Boolean(isActive))} /> {/* Utilisation de Boolean() */}
         {!isCollapsed && (
           <span className="flex-1 text-left">{item.name}</span>
         )}

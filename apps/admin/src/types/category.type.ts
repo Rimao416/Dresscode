@@ -1,30 +1,21 @@
 // types/category.type.ts
-// import { Product } from '@/types/product.type';
 
-export type Category = {
-  id: string;
+export type CategoryBase = {
   name: string;
+  description?: string;
+};
+
+export type Category = CategoryBase & {
+  id: string;
   slug: string;
-  parentId?: string | null;
-  parent?: Category | null;
-  children?: Category[];
-//   products?: Product[];
   createdAt: string | Date;
   updatedAt: string | Date;
 };
 
-export type CategoryFormData = {
-  name: string;
-  parentId?: string;
-};
+export type CategoryFormData = CategoryBase;
 
-export type CreateCategoryData = {
-  name: string;
-  parentId?: string | null;
-};
+export type CreateCategoryData = CategoryBase;
 
-export type UpdateCategoryData = {
+export type UpdateCategoryData = CategoryBase & {
   id: string;
-  name: string;
-  parentId?: string | null;
 };

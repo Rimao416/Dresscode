@@ -1,17 +1,13 @@
 'use client'
-
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Category } from '@/types/category.type'
 import { categorySchema, CategoryFormData } from '@/schemas/category.schema'
-import { useRootCategories } from '@/hooks/useRootCategories'
-import { useCategoryStore } from '@/store/categoryStore'
 import { useTheme } from '@/context/ThemeContext'
 import FormField from '../ui/formfield'
 import Input from '../ui/input'
 import Button from '../ui/button'
-import Select from '../ui/select'
 
 interface CategoryFormProps {
   onSubmit: (data: CategoryFormData) => Promise<void>;
@@ -26,8 +22,6 @@ export default function CategoryForm({
   isSubmitting,
   submitButtonText,
 }: CategoryFormProps) {
-  const { data: rootCategories = [], isLoading: isRootCategoriesLoading } = useRootCategories();
-  const { categories } = useCategoryStore();
   const { isDarkMode } = useTheme();
 
   const {
@@ -35,111 +29,69 @@ export default function CategoryForm({
     handleSubmit,
     formState: { errors },
     reset,
-    setValue,
-    watch
+    setValue
   } = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     defaultValues: {}
   });
 
-  const currentParentId = watch('parentId');
-
-  // Get available parent categories (exclude current category and its children if editing)
-  const getAvailableParentCategories = () => {
-    if (!initialData) return categories;
-    
-    const getAllDescendants = (categoryId: string): string[] => {
-      const descendants: string[] = [];
-      const children = categories.filter(cat => cat.parentId === categoryId);
-      
-      children.forEach(child => {
-        descendants.push(child.id);
-        descendants.push(...getAllDescendants(child.id));
-      });
-      
-      return descendants;
-    };
-
-    const excludedIds = [initialData.id, ...getAllDescendants(initialData.id)];
-    return categories.filter(cat => !excludedIds.includes(cat.id));
-  };
-
   useEffect(() => {
     if (initialData) {
       setValue('name', initialData.name);
-      setValue('parentId', initialData.parentId || '');
+      setValue('description', initialData.description);
     }
   }, [initialData, setValue]);
 
   const handleFormSubmit = async (data: CategoryFormData) => {
-    // Convert empty string to null for parentId
-    const formattedData = {
-      ...data,
-      parentId: data.parentId === '' ? null : data.parentId
-    };
-
-    await onSubmit(formattedData);
-    
+    await onSubmit(data);
+   
     if (!initialData) {
       reset();
     }
   };
 
-  const availableCategories = getAvailableParentCategories();
-
   return (
     <div className={`p-6 rounded-xl transition-all duration-300 ${
-      isDarkMode 
-        ? 'bg-gray-800/50 border-gray-700' 
-        : 'bg-white/70 border-gray-200'
+      isDarkMode
+        ? 'bg-slate-800/50 border-slate-700'
+        : 'bg-white/70 border-slate-200'
     } border backdrop-blur-sm shadow-lg`}>
-      
+     
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-        
-        {/* Category Name Field */}
+       
+        {/* Category Name Field - REQUIS */}
         <FormField
           label="Category name"
           htmlFor="name"
           error={errors.name?.message}
-          required
+          required={true}
         >
           <Input
             id="name"
             placeholder="Enter category name"
-            error={errors.name?.message}
             {...register('name')}
           />
         </FormField>
 
-        {/* Parent Category Field */}
+        {/* Category Description Field - OPTIONNEL */}
         <FormField
-          label="Parent Category"
-          htmlFor="parentId"
-          error={errors.parentId?.message}
+          label="Category description"
+          htmlFor="description"
+          error={errors.description?.message}
+          required={false}
+          helpText="Optional field to provide additional details about the category"
         >
-          <Select
-            id="parentId"
-            placeholder="Select parent category"
-            error={errors.parentId?.message}
-            {...register("parentId")}
-          >
-            <option value="">No parent (Root category)</option>
-            {isRootCategoriesLoading ? (
-              <option disabled>Loading...</option>
-            ) : (
-              availableCategories.map(category => (
-                <option key={category.id} value={category.id}>
-                  {category.parent ? `${category.parent.name} > ${category.name}` : category.name}
-                </option>
-              ))
-            )}
-          </Select>
+          <Input
+            id="description"
+            placeholder="Enter category description (optional)"
+            {...register('description')}
+          />
         </FormField>
 
         {/* Submit Button */}
         <div className="flex justify-end pt-4">
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             variant="primary"
             loading={isSubmitting}
             disabled={isSubmitting}
@@ -147,7 +99,6 @@ export default function CategoryForm({
             {submitButtonText}
           </Button>
         </div>
-
       </form>
     </div>
   )

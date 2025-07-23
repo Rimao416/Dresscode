@@ -1,5 +1,4 @@
 'use client'
-
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
@@ -11,51 +10,40 @@ import CategoryForm from '@/components/forms/CategoryForm'
 import { createCategory } from '@/services/category.service'
 import { useMessages } from '@/context/useMessage'
 import { CategoryFormData } from '@/schemas/category.schema'
-// import { useAuth } from '@/context/useAuth'
+import { useTheme } from '@/context/ThemeContext'
 
 export default function AddCategoryPage() {
-//   const { user } = useAuth()
   const router = useRouter()
   const queryClient = useQueryClient()
   const { setMessage } = useMessages()
   const { setLoading, setError } = useCategoryStore()
+  const { isDarkMode } = useTheme()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const onSubmit = async (data: CategoryFormData) => {
     setIsSubmitting(true)
     setLoading(true)
-
     try {
       const newCategory = await createCategory({
         name: data.name,
-        parentId: data.parentId || null,
+        description: data.description || "Aucune description fournie",
       })
-
+      
       const formattedCategory: Category = {
         id: newCategory.id,
         name: newCategory.name,
         slug: newCategory.slug,
-        parentId: newCategory.parentId,
-        parent: newCategory.parent || null,
-        children: newCategory.children || [],
+        description: newCategory.description,      
         createdAt: new Date(newCategory.createdAt),
         updatedAt: new Date(newCategory.updatedAt),
       }
-
+      
       // Mise à jour du cache React Query
       queryClient.setQueryData<Category[]>(['categories'], (old = []) => [
         ...old,
         formattedCategory,
       ])
-
-      // Mise à jour du cache pour les catégories racines si c'est une catégorie racine
-      if (!formattedCategory.parentId) {
-        queryClient.setQueryData<Category[]>(['rootCategories'], (old = []) => [
-          ...old,
-          formattedCategory,
-        ])
-      }
-
+      
       setMessage('Category created successfully', 'success')
       router.push('/dashboard/categories')
     } catch (err) {
@@ -76,8 +64,15 @@ export default function AddCategoryPage() {
           breadcrumb={['Category', 'Add a new category']}
           title='Category management'
         />
-
-        <div className=' rounded-lg p-6 shadow-sm'>
+        
+        {/* Container principal avec support du thème sombre */}
+        <div className={`
+          rounded-lg p-6 shadow-sm transition-all duration-300
+          ${isDarkMode 
+            ? 'bg-gray-800/90 border border-gray-700 shadow-gray-900/20' 
+            : 'bg-white border border-gray-200 shadow-gray-100/50'
+          }
+        `}>
           <CategoryForm
             onSubmit={onSubmit}
             isSubmitting={isSubmitting}

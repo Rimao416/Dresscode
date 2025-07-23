@@ -1,0 +1,9 @@
+// tsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@acme/db": ["./packages/db"] // ou "./packages/db" selon l'emplacement
+    }
+  }
+}

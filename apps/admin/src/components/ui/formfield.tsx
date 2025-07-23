@@ -26,36 +26,36 @@ const FormField: React.FC<FormFieldProps> = ({
   return (
     <div className={`space-y-2 ${className}`}>
       {label && (
-        <label 
+        <label
           htmlFor={htmlFor}
           className={`block text-sm font-semibold transition-colors ${
-            isDarkMode ? 'text-gray-200' : 'text-gray-700'
+            isDarkMode ? 'text-slate-200' : 'text-slate-700'
           }`}
         >
           {label}
           {required && (
             <span className={`ml-1 ${
-              isDarkMode ? 'text-red-400' : 'text-red-800'
+              isDarkMode ? 'text-amber-400' : 'text-amber-600'
             }`}>
               *
             </span>
           )}
         </label>
       )}
-      
+     
       {children}
-      
+     
       {helpText && !error && (
         <p className={`text-sm transition-colors ${
-          isDarkMode ? 'text-gray-400' : 'text-gray-500'
+          isDarkMode ? 'text-slate-400' : 'text-slate-500'
         }`}>
           {helpText}
         </p>
       )}
-      
+     
       {error && (
-        <p className={`text-sm flex items-center gap-1 transition-colors ${
-          isDarkMode ? 'text-red-400' : 'text-red-600'
+        <p className={`text-sm flex items-center gap-1.5 transition-colors ${
+          isDarkMode ? 'text-rose-400' : 'text-rose-600'
         }`}>
           <AlertCircle size={14} />
           {error}

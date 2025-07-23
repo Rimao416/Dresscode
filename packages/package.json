@@ -1,0 +1,15 @@
+{
+  "name": "@dresscode/db",
+  "version": "1.0.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": {
+      "types": "./index.ts",
+      "default": "./index.ts"
+    }
+  },
+  "dependencies": {
+    "@prisma/client": "^6.12.0"
+  }
+}
