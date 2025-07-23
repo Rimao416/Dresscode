@@ -1,4 +1,5 @@
 // hooks/useCategories.ts
+
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { getCategories } from '@/services/category.service';
@@ -19,29 +20,30 @@ export const useCategories = () => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Handle loading state
+  // Met à jour l'état de chargement dans le store
   useEffect(() => {
     setLoading(isLoading || isFetching);
-  }, [isLoading, isFetching, setLoading]);
+  }, [isLoading, isFetching]);
 
-  // Handle data updates
+  // Met à jour les catégories dans le store
   useEffect(() => {
     if (data) {
       const formattedData = data.map(category => ({
         ...category,
-        createdAt: category.createdAt instanceof Date ? category.createdAt.toISOString() : category.createdAt,
-        updatedAt: category.updatedAt instanceof Date ? category.updatedAt.toISOString() : category.updatedAt,
+        // createdAt: new Date(category.createdAt).toISOString(),
+        // updatedAt: new Date(category.updatedAt).toISOString(),
       }));
       setCategories(formattedData);
     }
-  }, [data, setCategories]);
+  }, [data]);
 
-  // Handle errors
+  // Gère les erreurs
   useEffect(() => {
     if (error) {
-      setError(error instanceof Error ? error.message : 'Unknown error');
+      const message = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
+      setError(message);
     }
-  }, [error, setError]);
+  }, [error]);
 
   return {
     data: categories,
@@ -51,7 +53,3 @@ export const useCategories = () => {
     refetch,
   };
 };
-
-// hooks/useCategory.ts
-
-

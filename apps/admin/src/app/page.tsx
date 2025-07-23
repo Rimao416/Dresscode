@@ -5,7 +5,7 @@ import React from "react";
 const DashboardPage = () => {
   return (
     <DashboardLayout>
-      <div className="p-8">
+      <div>
         <div className="bg-white rounded-xl shadow-sm p-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Dashboard Principal

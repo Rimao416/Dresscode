@@ -17,14 +17,15 @@ import {
 } from '@tanstack/react-table';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMessages } from '@/context/useMessage';
+import { useTheme } from '@/context/ThemeContext';
 
 const isClickableElement = (element: HTMLElement): boolean => {
   const clickableSelectors = [
     'button',
     'a',
     '[role="button"]',
-    '[data-no-row-click]', // Pour marquer des éléments spécifiques
-    '.no-row-click', // Classe CSS pour marquer des éléments
+    '[data-no-row-click]',
+    '.no-row-click',
     '.modal-trigger',
     '.dropdown-trigger'
   ];
@@ -67,20 +68,26 @@ export interface DataTableProps<T> {
 }
 
 // Skeleton loader component
-const SkeletonRow = ({ columnsCount }: { columnsCount: number }) => (
-  <tr className="border-t">
+const SkeletonRow = ({ columnsCount, isDarkMode }: { columnsCount: number; isDarkMode: boolean }) => (
+  <tr className={`border-t ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
     {Array.from({ length: columnsCount }, (_, index) => (
       <td key={index} className="py-3 pr-4">
-        <div className="animate-pulse bg-gray-200 h-4 rounded w-full"></div>
+        <div className={`animate-pulse h-4 rounded w-full ${
+          isDarkMode ? 'bg-slate-700' : 'bg-gray-200'
+        }`}></div>
       </td>
     ))}
   </tr>
 );
 
-const SkeletonTable = ({ columnsCount, rowsCount = 5 }: { columnsCount: number; rowsCount?: number }) => (
+const SkeletonTable = ({ columnsCount, rowsCount = 5, isDarkMode }: { 
+  columnsCount: number; 
+  rowsCount?: number;
+  isDarkMode: boolean;
+}) => (
   <tbody className="text-sm">
     {Array.from({ length: rowsCount }, (_, index) => (
-      <SkeletonRow key={index} columnsCount={columnsCount} />
+      <SkeletonRow key={index} columnsCount={columnsCount} isDarkMode={isDarkMode} />
     ))}
   </tbody>
 );
@@ -99,6 +106,7 @@ export function DataTable<T extends object>({
   keyExtractor,
   readOnly = false
 }: DataTableProps<T>) {
+  const { isDarkMode } = useTheme();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedFilterValues, setSelectedFilterValues] = useState<Record<string, string>>({});
   const [globalFilter, setGlobalFilter] = useState('');
@@ -135,8 +143,15 @@ export function DataTable<T extends object>({
         <div className="flex space-x-2">
           {onEdit && (
             <motion.button
-              className="p-1 rounded-full hover:bg-gray-100 disabled:opacity-50"
-              whileHover={!loading ? { scale: 1.15, backgroundColor: "#f0f9ff" } : {}}
+              className={`p-1 rounded-full disabled:opacity-50 transition-colors ${
+                isDarkMode 
+                  ? 'hover:bg-slate-800' 
+                  : 'hover:bg-gray-100'
+              }`}
+              whileHover={!loading ? { 
+                scale: 1.15, 
+                backgroundColor: isDarkMode ? "#1e293b" : "#f0f9ff" 
+              } : {}}
               whileTap={!loading ? { scale: 0.9 } : {}}
               onClick={(e) => {
                 e.stopPropagation();
@@ -150,8 +165,15 @@ export function DataTable<T extends object>({
           )}
           {onDelete && (
             <motion.button
-              className="p-1 rounded-full hover:bg-gray-100 disabled:opacity-50"
-              whileHover={!loading ? { scale: 1.15, backgroundColor: "#fef2f2" } : {}}
+              className={`p-1 rounded-full disabled:opacity-50 transition-colors ${
+                isDarkMode 
+                  ? 'hover:bg-slate-800' 
+                  : 'hover:bg-gray-100'
+              }`}
+              whileHover={!loading ? { 
+                scale: 1.15, 
+                backgroundColor: isDarkMode ? "#1e293b" : "#fef2f2" 
+              } : {}}
               whileTap={!loading ? { scale: 0.9 } : {}}
               onClick={(e) => {
                 e.stopPropagation();
@@ -263,12 +285,24 @@ export function DataTable<T extends object>({
  
   // Render a single filter based on its type
   const renderFilter = (filter: FilterOption<T>) => {
+    const inputClasses = `w-full py-2 pl-3 pr-10 border rounded-md appearance-none text-sm disabled:opacity-50 transition-colors ${
+      isDarkMode 
+        ? 'bg-slate-800 border-slate-600 text-slate-100 focus:border-blue-400' 
+        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
+    }`;
+
+    const textInputClasses = `w-full pl-3 pr-8 py-2 border rounded-md text-sm disabled:opacity-50 transition-colors ${
+      isDarkMode 
+        ? 'bg-slate-800 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-blue-400' 
+        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
+    }`;
+
     switch (filter.type) {
       case 'select':
         return (
           <div className="relative">
             <select
-              className="w-full py-2 pl-3 pr-10 border rounded-md appearance-none bg-white text-sm disabled:opacity-50"
+              className={inputClasses}
               value={selectedFilterValues[filter.columnId] || `Select ${filter.label}`}
               onChange={(e) => handleFilterChange(filter.columnId, e.target.value)}
               disabled={loading}
@@ -280,7 +314,9 @@ export function DataTable<T extends object>({
               ))}
             </select>
             <div className="absolute right-3 top-2.5 pointer-events-none">
-              <ChevronRight className="h-4 w-4 rotate-90" />
+              <ChevronRight className={`h-4 w-4 rotate-90 ${
+                isDarkMode ? 'text-slate-400' : 'text-gray-400'
+              }`} />
             </div>
           </div>
         );
@@ -298,7 +334,14 @@ export function DataTable<T extends object>({
                   disabled={loading}
                   onClick={() => handleFilterChange(filter.columnId, option.value)}
                 />
-                <label htmlFor={option.id} className="text-sm">{option.label}</label>
+                <label 
+                  htmlFor={option.id} 
+                  className={`text-sm ${
+                    isDarkMode ? 'text-slate-300' : 'text-gray-700'
+                  }`}
+                >
+                  {option.label}
+                </label>
               </div>
             ))}
           </div>
@@ -310,7 +353,7 @@ export function DataTable<T extends object>({
             <div className="flex items-center">
               <input
                 type="date"
-                className="w-full py-2 pl-3 pr-4 border rounded-md text-sm disabled:opacity-50"
+                className={textInputClasses}
                 value={selectedFilterValues[filter.columnId] || ''}
                 disabled={loading}
                 onChange={(e) => {
@@ -324,7 +367,11 @@ export function DataTable<T extends object>({
               />
               {selectedFilterValues[filter.columnId] && (
                 <button
-                  className="ml-2 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                  className={`ml-2 disabled:opacity-50 transition-colors ${
+                    isDarkMode 
+                      ? 'text-slate-400 hover:text-slate-200' 
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
                   onClick={() => clearFilter(filter.columnId)}
                   disabled={loading}
                   aria-label="Clear date filter"
@@ -342,7 +389,7 @@ export function DataTable<T extends object>({
             <input
               type="text"
               placeholder={filter.placeholder || `Filter by ${filter.label}`}
-              className="w-full pl-3 pr-8 py-2 border rounded-md text-sm disabled:opacity-50"
+              className={textInputClasses}
               value={selectedFilterValues[filter.columnId] || ''}
               disabled={loading}
               onChange={(e) => handleFilterChange(filter.columnId, e.target.value)}
@@ -350,7 +397,11 @@ export function DataTable<T extends object>({
             />
             {selectedFilterValues[filter.columnId] && (
               <button
-                className="absolute right-2 top-2.5 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                className={`absolute right-2 top-2.5 disabled:opacity-50 transition-colors ${
+                  isDarkMode 
+                    ? 'text-slate-400 hover:text-slate-200' 
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
                 onClick={() => clearFilter(filter.columnId)}
                 disabled={loading}
                 aria-label="Clear filter"
@@ -368,7 +419,11 @@ export function DataTable<T extends object>({
  
   return (
     <motion.div
-      className="bg-white rounded-md shadow-sm p-6"
+      className={`rounded-xl shadow-lg p-6 transition-all duration-300 ${
+        isDarkMode
+          ? 'bg-slate-800/50 border-slate-700 backdrop-blur-sm'
+          : 'bg-white/70 border-slate-200 backdrop-blur-sm'
+      } border`}
       initial={{ y: 20 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
@@ -376,24 +431,36 @@ export function DataTable<T extends object>({
       <div className="mb-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <h2 className="text-sm font-medium">{title}</h2>
+            <h2 className={`text-lg font-semibold ${
+              isDarkMode ? 'text-slate-100' : 'text-gray-900'
+            }`}>
+              {title}
+            </h2>
             {onRefresh && (
               <motion.button
-                className="p-1 rounded-full hover:bg-gray-100 disabled:opacity-50"
+                className={`p-2 rounded-full disabled:opacity-50 transition-colors ${
+                  isDarkMode 
+                    ? 'hover:bg-slate-700 text-slate-400' 
+                    : 'hover:bg-gray-100 text-gray-500'
+                }`}
                 onClick={handleRefresh}
                 disabled={loading || isRefreshing}
                 whileHover={!loading && !isRefreshing ? { scale: 1.1 } : {}}
                 whileTap={!loading && !isRefreshing ? { scale: 0.9 } : {}}
                 aria-label="Refresh data"
               >
-                <RefreshCw className={`h-4 w-4 text-gray-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               </motion.button>
             )}
           </div>
          
           {/* Error message */}
           {error && (
-            <div className="text-red-500 text-sm bg-red-50 px-3 py-1 rounded">
+            <div className={`text-sm px-3 py-1 rounded transition-colors ${
+              isDarkMode 
+                ? 'text-red-400 bg-red-900/20' 
+                : 'text-red-500 bg-red-50'
+            }`}>
               {error}
             </div>
           )}
@@ -406,16 +473,26 @@ export function DataTable<T extends object>({
               <input
                 type="text"
                 placeholder="Search here..."
-                className="w-full pl-10 pr-4 py-2 border rounded-md text-sm disabled:opacity-50"
+                className={`w-full pl-10 pr-4 py-2 border rounded-md text-sm disabled:opacity-50 transition-colors ${
+                  isDarkMode 
+                    ? 'bg-slate-800 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-blue-400' 
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
+                }`}
                 value={globalFilter || ''}
                 disabled={loading}
                 onChange={(e) => setGlobalFilter(e.target.value)}
                 aria-label="Search items"
               />
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+              <Search className={`absolute left-3 top-2.5 h-4 w-4 ${
+                isDarkMode ? 'text-slate-400' : 'text-gray-400'
+              }`} />
               {globalFilter && (
                 <button
-                  className="absolute right-2 top-2.5 text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                  className={`absolute right-2 top-2.5 disabled:opacity-50 transition-colors ${
+                    isDarkMode 
+                      ? 'text-slate-400 hover:text-slate-200' 
+                      : 'text-gray-400 hover:text-gray-600'
+                  }`}
                   onClick={() => setGlobalFilter('')}
                   disabled={loading}
                   aria-label="Clear search"
@@ -436,10 +513,16 @@ export function DataTable<T extends object>({
               <div className="flex justify-end">
                 <div className="relative">
                   <motion.button
-                    className="flex items-center space-x-2 px-4 py-2 border rounded-md text-sm disabled:opacity-50"
+                    className={`flex items-center space-x-2 px-4 py-2 border rounded-md text-sm disabled:opacity-50 transition-colors ${
+                      isDarkMode 
+                        ? 'bg-slate-800 border-slate-600 text-slate-100 hover:bg-slate-700' 
+                        : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
                     onClick={() => setIsFilterOpen(!isFilterOpen)}
                     disabled={loading}
-                    whileHover={!loading ? { backgroundColor: "#f9fafb" } : {}}
+                    whileHover={!loading ? { 
+                      backgroundColor: isDarkMode ? "#334155" : "#f9fafb" 
+                    } : {}}
                     whileTap={!loading ? { scale: 0.97 } : {}}
                     aria-expanded={isFilterOpen}
                     aria-controls="filter-dropdown"
@@ -453,7 +536,11 @@ export function DataTable<T extends object>({
                       <motion.div
                         ref={filterRef}
                         id="filter-dropdown"
-                        className="absolute right-0 mt-2 w-64 bg-white border rounded-md shadow-lg z-10 p-4"
+                        className={`absolute right-0 mt-2 w-64 border rounded-md shadow-lg z-10 p-4 transition-colors ${
+                          isDarkMode 
+                            ? 'bg-slate-800 border-slate-600' 
+                            : 'bg-white border-gray-200'
+                        }`}
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
@@ -461,7 +548,11 @@ export function DataTable<T extends object>({
                       >
                         {dropdownFilters.map((filter) => (
                           <div key={filter.columnId} className="mb-4">
-                            <h3 className="font-medium mb-2 text-sm">Filter by {filter.label}</h3>
+                            <h3 className={`font-medium mb-2 text-sm ${
+                              isDarkMode ? 'text-slate-200' : 'text-gray-700'
+                            }`}>
+                              Filter by {filter.label}
+                            </h3>
                             {renderFilter(filter)}
                           </div>
                         ))}
@@ -469,10 +560,16 @@ export function DataTable<T extends object>({
                         {/* Reset all filters button */}
                         {Object.keys(selectedFilterValues).length > 0 && (
                           <motion.button
-                            className="w-full mt-2 py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded text-sm font-medium disabled:opacity-50"
+                            className={`w-full mt-2 py-2 px-4 rounded text-sm font-medium disabled:opacity-50 transition-colors ${
+                              isDarkMode 
+                                ? 'bg-slate-700 hover:bg-slate-600 text-slate-200' 
+                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                            }`}
                             onClick={resetAllFilters}
                             disabled={loading}
-                            whileHover={!loading ? { backgroundColor: "#f3f4f6" } : {}}
+                            whileHover={!loading ? { 
+                              backgroundColor: isDarkMode ? "#475569" : "#f3f4f6" 
+                            } : {}}
                             whileTap={!loading ? { scale: 0.97 } : {}}
                             aria-label="Reset all filters"
                           >
@@ -493,10 +590,21 @@ export function DataTable<T extends object>({
               {Object.entries(selectedFilterValues).map(([columnId, value]) => {
                 const filterOption = filterOptions.find(option => option.columnId === columnId);
                 return (
-                  <div key={columnId} className="flex items-center bg-blue-50 text-blue-700 rounded-full px-3 py-1 text-xs">
+                  <div 
+                    key={columnId} 
+                    className={`flex items-center rounded-full px-3 py-1 text-xs transition-colors ${
+                      isDarkMode 
+                        ? 'bg-blue-900/30 text-blue-300' 
+                        : 'bg-blue-50 text-blue-700'
+                    }`}
+                  >
                     <span>{filterOption?.label}: {value}</span>
                     <button
-                      className="ml-2 text-blue-700 hover:text-blue-900 disabled:opacity-50"
+                      className={`ml-2 disabled:opacity-50 transition-colors ${
+                        isDarkMode 
+                          ? 'text-blue-300 hover:text-blue-100' 
+                          : 'text-blue-700 hover:text-blue-900'
+                      }`}
                       onClick={() => clearFilter(columnId)}
                       disabled={loading}
                       aria-label={`Remove ${filterOption?.label} filter`}
@@ -508,7 +616,11 @@ export function DataTable<T extends object>({
               })}
               {Object.keys(selectedFilterValues).length > 1 && (
                 <button
-                  className="flex items-center bg-gray-100 hover:bg-gray-200 rounded-full px-3 py-1 text-xs disabled:opacity-50"
+                  className={`flex items-center rounded-full px-3 py-1 text-xs disabled:opacity-50 transition-colors ${
+                    isDarkMode 
+                      ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' 
+                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                  }`}
                   onClick={resetAllFilters}
                   disabled={loading}
                   aria-label="Clear all filters"
@@ -524,7 +636,9 @@ export function DataTable<T extends object>({
           <table className="min-w-full" role="grid" aria-label={`${title} table`}>
             <thead>
               {table.getHeaderGroups().map(headerGroup => (
-                <tr key={headerGroup.id} className="text-left text-sm font-normal text-gray-500">
+                <tr key={headerGroup.id} className={`text-left text-sm font-normal ${
+                  isDarkMode ? 'text-slate-400' : 'text-gray-500'
+                }`}>
                   {headerGroup.headers.map(header => (
                     <th
                       key={header.id}
@@ -536,7 +650,9 @@ export function DataTable<T extends object>({
                       {header.isPlaceholder ? null : (
                         <div className="flex items-center">
                           {loading && header.id !== 'actions' ? (
-                            <div className="animate-pulse bg-gray-200 h-4 rounded w-20"></div>
+                            <div className={`animate-pulse h-4 rounded w-20 ${
+                              isDarkMode ? 'bg-slate-600' : 'bg-gray-200'
+                            }`}></div>
                           ) : (
                             flexRender(header.column.columnDef.header, header.getContext())
                           )}
@@ -555,14 +671,18 @@ export function DataTable<T extends object>({
             </thead>
            
             {loading ? (
-              <SkeletonTable columnsCount={allColumns.length} />
+              <SkeletonTable columnsCount={allColumns.length} isDarkMode={isDarkMode} />
             ) : (
               <tbody className="text-sm">
                 {table.getRowModel().rows.length > 0 ? (
                   table.getRowModel().rows.map(row => (
                     <motion.tr
                       key={row.id}
-                      className={`border-t hover:bg-gray-50 ${onViewDetails ? 'cursor-pointer' : ''}`}
+                      className={`border-t transition-colors ${
+                        isDarkMode 
+                          ? 'border-slate-700 hover:bg-slate-700/50 text-slate-200' 
+                          : 'border-gray-200 hover:bg-gray-50 text-gray-900'
+                      } ${onViewDetails ? 'cursor-pointer' : ''}`}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
@@ -577,7 +697,9 @@ export function DataTable<T extends object>({
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={allColumns.length} className="py-6 text-center text-gray-500">
+                    <td colSpan={allColumns.length} className={`py-6 text-center ${
+                      isDarkMode ? 'text-slate-400' : 'text-gray-500'
+                    }`}>
                       No records found
                     </td>
                   </tr>
@@ -587,10 +709,14 @@ export function DataTable<T extends object>({
           </table>
         </div>
        
-        <div className="flex items-center justify-between mt-4 text-sm">
-          <div className="text-gray-500">
+        <div className={`flex items-center justify-between mt-4 text-sm ${
+          isDarkMode ? 'text-slate-400' : 'text-gray-500'
+        }`}>
+          <div>
             {loading ? (
-              <div className="animate-pulse bg-gray-200 h-4 rounded w-32"></div>
+              <div className={`animate-pulse h-4 rounded w-32 ${
+                isDarkMode ? 'bg-slate-600' : 'bg-gray-200'
+              }`}></div>
             ) : (
               table.getRowModel().rows.length > 0 ? (
                 <>
@@ -604,9 +730,13 @@ export function DataTable<T extends object>({
           </div>
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-1">
-              <span className="text-gray-500">Items per page:</span>
+              <span>Items per page:</span>
               <select
-                className="border rounded p-1 text-sm disabled:opacity-50"
+                className={`border rounded p-1 text-sm disabled:opacity-50 transition-colors ${
+                  isDarkMode 
+                    ? 'bg-slate-800 border-slate-600 text-slate-100' 
+                    : 'bg-white border-gray-300 text-gray-900'
+                }`}
                 value={table.getState().pagination.pageSize}
                 disabled={loading}
                 onChange={e => {
@@ -623,18 +753,30 @@ export function DataTable<T extends object>({
             </div>
             <div className="flex items-center" aria-label="Pagination">
               <motion.button
-                className="p-1 rounded border disabled:opacity-50"
+                className={`p-1 rounded border disabled:opacity-50 transition-colors ${
+                  isDarkMode 
+                    ? 'border-slate-600 hover:bg-slate-700' 
+                    : 'border-gray-300 hover:bg-gray-50'
+                }`}
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage() || loading}
-                whileHover={table.getCanPreviousPage() && !loading ? { backgroundColor: "#f9fafb" } : {}}
+                whileHover={table.getCanPreviousPage() && !loading ? { 
+                  backgroundColor: isDarkMode ? "#334155" : "#f9fafb" 
+                } : {}}
                 whileTap={table.getCanPreviousPage() && !loading ? { scale: 0.95 } : {}}
                 aria-label="Previous page"
               >
-                <ChevronLeft className={`h-4 w-4 ${!table.getCanPreviousPage() || loading ? 'text-gray-300' : ''}`} />
+                <ChevronLeft className={`h-4 w-4 ${
+                  !table.getCanPreviousPage() || loading ? 
+                    (isDarkMode ? 'text-slate-600' : 'text-gray-300') : 
+                    (isDarkMode ? 'text-slate-300' : 'text-gray-600')
+                }`} />
               </motion.button>
               <div className="px-4" aria-current="page">
                 {loading ? (
-                  <div className="animate-pulse bg-gray-200 h-4 rounded w-8"></div>
+                  <div className={`animate-pulse h-4 rounded w-8 ${
+                    isDarkMode ? 'bg-slate-600' : 'bg-gray-200'
+                  }`}></div>
                 ) : (
                   <>
                     {table.getState().pagination.pageIndex + 1}/
@@ -643,14 +785,24 @@ export function DataTable<T extends object>({
                 )}
               </div>
               <motion.button
-                className="p-1 rounded border disabled:opacity-50"
+                className={`p-1 rounded border disabled:opacity-50 transition-colors ${
+                  isDarkMode 
+                    ? 'border-slate-600 hover:bg-slate-700' 
+                    : 'border-gray-300 hover:bg-gray-50'
+                }`}
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage() || loading}
-                whileHover={table.getCanNextPage() && !loading ? { backgroundColor: "#f9fafb" } : {}}
+                whileHover={table.getCanNextPage() && !loading ? { 
+                  backgroundColor: isDarkMode ? "#334155" : "#f9fafb" 
+                } : {}}
                 whileTap={table.getCanNextPage() && !loading ? { scale: 0.95 } : {}}
                 aria-label="Next page"
               >
-                <ChevronRight className={`h-4 w-4 ${!table.getCanNextPage() || loading ? 'text-gray-300' : ''}`} />
+                <ChevronRight className={`h-4 w-4 ${
+                  !table.getCanNextPage() || loading ? 
+                    (isDarkMode ? 'text-slate-600' : 'text-gray-300') : 
+                    (isDarkMode ? 'text-slate-300' : 'text-gray-600')
+                }`} />
               </motion.button>
             </div>
           </div>

@@ -271,18 +271,18 @@ const searchVariants = {
         </motion.header>
 
         {/* Content Area with Beautiful Padding and Styling */}
-        <div className="flex-1 overflow-hidden p-6">
+        <div className="flex-1 overflow-hidden p-2">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className={`h-full rounded-2xl shadow-xl ${
+            className={`h-full shadow-xl ${
               isDarkMode
                 ? 'bg-gray-800/50 border-gray-700'
                 : 'bg-white/70 border-gray-200'
             } border backdrop-blur-sm overflow-hidden`}
           >
-            <div className="h-full overflow-y-auto p-8">
+            <div className="h-full overflow-y-auto p-4">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

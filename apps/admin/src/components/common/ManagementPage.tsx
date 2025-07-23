@@ -3,12 +3,14 @@ import { ManagementPageConfig, CustomWidget } from '@/types/management.type';
 import GenericErrorBoundary from './GenericErrorBoundary';
 import { StatCard } from './StatCard';
 import { DataTable } from './Datatable';
+import { useTheme } from '@/context/ThemeContext';
 
 interface ManagementPageProps<T extends { id: string | number }> {
   config: ManagementPageConfig<T>;
 }
 
 const ManagementPage = <T extends { id: string | number }>({ config }: ManagementPageProps<T>) => {
+  const { isDarkMode } = useTheme();
   const { data, isLoading } = config.useDataHook();
 
   const handleEdit = (id: number) => {
@@ -55,7 +57,11 @@ const ManagementPage = <T extends { id: string | number }>({ config }: Managemen
         style={{ order: widget.order || 0 }}
       >
         {widget.title && (
-          <h3 className="text-lg font-medium mb-4">{widget.title}</h3>
+          <h3 className={`text-lg font-medium mb-4 ${
+            isDarkMode ? 'text-gray-100' : 'text-gray-900'
+          }`}>
+            {widget.title}
+          </h3>
         )}
         {content}
       </div>
@@ -73,16 +79,47 @@ const ManagementPage = <T extends { id: string | number }>({ config }: Managemen
   const leftWidgets = getWidgetsByPosition('left');
   const rightWidgets = getWidgetsByPosition('right');
 
+  // Classes CSS dynamiques basées sur le thème
+  // const pageClasses = `min-h-screen transition-colors duration-300 ${
+  //   isDarkMode 
+  //     ? 'bg-gray-900 text-gray-100' 
+  //     : 'bg-white text-gray-900'
+  // }`;
+
+  const cardClasses = `rounded-lg shadow-lg transition-colors duration-300 ${
+    isDarkMode 
+      ? 'bg-gray-800 shadow-gray-900/50' 
+      : 'bg-white shadow-gray-200/50'
+  }`;
+
+  const buttonPrimaryClasses = `px-4 py-2 rounded-lg transition-all duration-300 ${
+    isDarkMode
+      ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-900/50'
+      : 'bg-brand-500 hover:bg-brand-600 text-white shadow-lg shadow-brand-500/25'
+  }`;
+
+  const buttonSecondaryClasses = `px-4 py-2 border rounded-lg transition-all duration-300 ${
+    isDarkMode
+      ? 'border-blue-500 text-blue-400 hover:bg-blue-900/50 hover:border-blue-400'
+      : 'border-brand-500 text-brand-500 hover:bg-brand-50 hover:border-brand-600'
+  }`;
+
   return (
     <GenericErrorBoundary>
-      <div className="min-h-screen bg-gray-50 p-6">
+      {/* <div className={pageClasses}> */}
+      <div>
+        {/* Header avec titre et boutons */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3 sm:gap-0">
-          <h1 className="text-lg sm:text-xl font-medium">{config.title}</h1>
+          <h1 className={`text-lg sm:text-xl font-medium transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-100' : 'text-gray-900'
+          }`}>
+            {config.title}
+          </h1>
           <div className="flex flex-col sm:flex-row gap-3">
             {config.secondaryButton && (
               <button
                 onClick={config.secondaryButton.onClick}
-                className="px-4 py-2 border border-brand-500 text-brand-500 rounded-lg hover:bg-brand-50 transition-colors"
+                className={buttonSecondaryClasses}
               >
                 {config.secondaryButton.label}
               </button>
@@ -90,7 +127,7 @@ const ManagementPage = <T extends { id: string | number }>({ config }: Managemen
             {config.addNewButton && (
               <button
                 onClick={config.addNewButton.onClick}
-                className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-500 transition-colors"
+                className={buttonPrimaryClasses}
               >
                 {config.addNewButton.label}
               </button>
@@ -98,6 +135,7 @@ const ManagementPage = <T extends { id: string | number }>({ config }: Managemen
           </div>
         </div>
 
+        {/* Section des statistiques */}
         {config.stats && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-6">
             {config.stats.map((stat, index) => (
@@ -114,40 +152,45 @@ const ManagementPage = <T extends { id: string | number }>({ config }: Managemen
           </div>
         )}
 
+        {/* Widgets du haut */}
         {topWidgets.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             {topWidgets.map(renderWidget)}
           </div>
         )}
 
+        {/* Grille principale avec widgets latéraux et table */}
         <div className="grid grid-cols-12 gap-6">
+          {/* Widgets de gauche */}
           {leftWidgets.length > 0 && (
             <div className="col-span-12 lg:col-span-3 space-y-6">
               {leftWidgets.map(renderWidget)}
             </div>
           )}
 
+          {/* Table de données principale */}
           <div className={`
             col-span-12
             ${leftWidgets.length > 0 && rightWidgets.length > 0 ? 'lg:col-span-6' :
               leftWidgets.length > 0 || rightWidgets.length > 0 ? 'lg:col-span-9' : ''}
           `}>
-        <div className="bg-white rounded-lg shadow">
-  <DataTable<T>
-    data={data || []}
-    columns={config.columns}
-    title={config.title}
-    loading={isLoading}
-    onEdit={config.actions?.some(a => a.label === 'Edit') ? handleEdit : undefined}
-    onDelete={config.actions?.some(a => a.label === 'Delete') ? handleDelete : undefined}
-    filterOptions={filterOptions}
-    keyExtractor={(item) => Number(item.id)} // Conversion en number
-    readOnly={config.readOnly}
-    onViewDetails={config.onViewDetails}
-  />
-</div>
+            <div className={cardClasses}>
+              <DataTable<T>
+                data={data || []}
+                columns={config.columns}
+                title={config.title}
+                loading={isLoading}
+                onEdit={config.actions?.some(a => a.label === 'Edit') ? handleEdit : undefined}
+                onDelete={config.actions?.some(a => a.label === 'Delete') ? handleDelete : undefined}
+                filterOptions={filterOptions}
+                keyExtractor={(item) => Number(item.id)}
+                readOnly={config.readOnly}
+                onViewDetails={config.onViewDetails}
+              />
+            </div>
           </div>
 
+          {/* Widgets de droite */}
           {rightWidgets.length > 0 && (
             <div className="col-span-12 lg:col-span-3 space-y-6">
               {rightWidgets.map(renderWidget)}
@@ -155,6 +198,7 @@ const ManagementPage = <T extends { id: string | number }>({ config }: Managemen
           )}
         </div>
 
+        {/* Widgets du bas */}
         {bottomWidgets.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
             {bottomWidgets.map(renderWidget)}
