@@ -39,3 +39,4 @@ packages/db/generated/
 /app/generated/prisma
 .turbo
 generated/prisma
+/generated/prisma
