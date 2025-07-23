@@ -1,6 +1,6 @@
 "use client";
 import { useRef } from 'react';
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Search, Filter, Edit, Trash2, X, RefreshCw } from 'lucide-react';
 import {
   useReactTable,
@@ -11,11 +11,12 @@ import {
   ColumnDef,
   getSortedRowModel,
   ColumnFiltersState,
-  SortingState
+  SortingState,
+  Row,
+  Cell
 } from '@tanstack/react-table';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMessages } from '@/context/useMessage';
-
 
 const isClickableElement = (element: HTMLElement): boolean => {
   const clickableSelectors = [
@@ -27,7 +28,7 @@ const isClickableElement = (element: HTMLElement): boolean => {
     '.modal-trigger',
     '.dropdown-trigger'
   ];
-  
+ 
   return clickableSelectors.some(selector => {
     return element.matches(selector) || element.closest(selector);
   });
@@ -60,7 +61,6 @@ export interface DataTableProps<T> {
   onEdit?: (id: number) => void;
   onDelete?: (id: number) => void;
   onViewDetails?: (item: T) => void;
-  isDeleting?: boolean;
   filterOptions?: FilterOption<T>[];
   keyExtractor: (item: T) => number;
   readOnly?: boolean;
@@ -95,7 +95,6 @@ export function DataTable<T extends object>({
   onEdit,
   onDelete,
   onViewDetails,
-  isDeleting = false,
   filterOptions = [],
   keyExtractor,
   readOnly = false
@@ -107,7 +106,6 @@ export function DataTable<T extends object>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { setMessage } = useMessages();
-
   const filterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -116,7 +114,6 @@ export function DataTable<T extends object>({
         setIsFilterOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -134,7 +131,7 @@ export function DataTable<T extends object>({
     ...(readOnly ? [] : (onEdit || onDelete) ? [{
       id: 'actions',
       header: '',
-      cell: ({ row }: { row: any }) => (
+      cell: ({ row }: { row: Row<T> }) => (
         <div className="flex space-x-2">
           {onEdit && (
             <motion.button
@@ -172,18 +169,18 @@ export function DataTable<T extends object>({
   ];
 
   // Handle row click for view details
-  const handleRowClick = (row: any, event: React.MouseEvent) => {
-  const target = event.target as HTMLElement;
-  
-  // Ne pas naviguer si le clic provient d'un élément interactif
-  if (isClickableElement(target)) {
-    return;
-  }
-  
-  if (onViewDetails && !loading) {
-    onViewDetails(row.original);
-  }
-};
+  const handleRowClick = (row: Row<T>, event: React.MouseEvent) => {
+    const target = event.target as HTMLElement;
+ 
+    // Ne pas naviguer si le clic provient d'un élément interactif
+    if (isClickableElement(target)) {
+      return;
+    }
+ 
+    if (onViewDetails && !loading) {
+      onViewDetails(row.original);
+    }
+  };
  
   // Memoize the table instance
   const table = useReactTable({
@@ -214,6 +211,9 @@ export function DataTable<T extends object>({
       setIsRefreshing(true);
       try {
         await onRefresh();
+        setMessage?.('Data refreshed successfully', 'success');
+      } catch (error) {
+        setMessage?.('Failed to refresh data', 'error');
       } finally {
         setIsRefreshing(false);
       }
@@ -223,7 +223,7 @@ export function DataTable<T extends object>({
   // Handle filter changes
   const handleFilterChange = (columnId: string, value: string) => {
     if (loading) return;
-    
+   
     setSelectedFilterValues(prev => ({
       ...prev,
       [columnId]: value
@@ -242,7 +242,7 @@ export function DataTable<T extends object>({
   // Clear specific filter
   const clearFilter = (columnId: string) => {
     if (loading) return;
-    
+   
     setSelectedFilterValues(prev => {
       const newValues = {...prev};
       delete newValues[columnId];
@@ -255,7 +255,7 @@ export function DataTable<T extends object>({
   // Reset all filters
   const resetAllFilters = () => {
     if (loading) return;
-    
+   
     setSelectedFilterValues({});
     setColumnFilters([]);
     setGlobalFilter('');
@@ -431,7 +431,7 @@ export function DataTable<T extends object>({
                 {renderFilter(filter)}
               </div>
             ))}
-          
+         
             {dropdownFilters.length > 0 && (
               <div className="flex justify-end">
                 <div className="relative">
@@ -553,7 +553,7 @@ export function DataTable<T extends object>({
                 </tr>
               ))}
             </thead>
-            
+           
             {loading ? (
               <SkeletonTable columnsCount={allColumns.length} />
             ) : (
@@ -561,14 +561,14 @@ export function DataTable<T extends object>({
                 {table.getRowModel().rows.length > 0 ? (
                   table.getRowModel().rows.map(row => (
                     <motion.tr
-  key={row.id}
-  className={`border-t hover:bg-gray-50 ${onViewDetails ? 'cursor-pointer' : ''}`}
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  transition={{ duration: 0.3 }}
-  onClick={(e) => handleRowClick(row, e)}
->
-                      {row.getVisibleCells().map(cell => (
+                      key={row.id}
+                      className={`border-t hover:bg-gray-50 ${onViewDetails ? 'cursor-pointer' : ''}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                      onClick={(e) => handleRowClick(row, e)}
+                    >
+                      {row.getVisibleCells().map((cell: Cell<T, unknown>) => (
                         <td key={cell.id} className="py-3 pr-4">
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>

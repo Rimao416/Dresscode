@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { cubicBezier } from "framer-motion";
 import {
   Search,
   Bell,
@@ -46,14 +47,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
   };
 
-  const searchVariants = {
-    initial: { width: "300px" },
-    focus: {
-      width: "400px",
-      transition: { duration: 0.3, ease: "easeOut" }
+const searchVariants = {
+  initial: { width: "300px" },
+  focus: {
+    width: "400px",
+    transition: {
+      duration: 0.3,
+      ease: cubicBezier(0.25, 0.46, 0.45, 0.94)
     }
-  };
-
+  }
+};
   const notificationVariants = {
     initial: { scale: 1 },
     hover: {
@@ -119,12 +122,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
             {/* Center Section - Search */}
             <motion.div
-
-
-
-
-
-            
               variants={searchVariants}
               initial="initial"
               whileFocus="focus"

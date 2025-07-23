@@ -11,12 +11,10 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 const Input = forwardRef<HTMLInputElement, InputProps>(({
   type = 'text',
-  label,
   placeholder,
   value,
   onChange,
   error,
-  required = false,
   disabled = false,
   className = '',
   showPasswordToggle = false,
