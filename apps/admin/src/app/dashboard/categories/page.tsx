@@ -3,29 +3,18 @@
 import { ManagementPageConfig } from "@/types/management.type";
 import { Category } from "@/types/category.type";
 import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import ManagementPage from "@/components/common/ManagementPage";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import { useCategories } from "@/hooks/categories/useCategories";
-import { useDeleteCategory } from "@/hooks/categories/useDeleteCategory";
 
 export default function CategoriesPage() {
   const router = useRouter();
   const { data: categories, isLoading, isFetching, error, refetch } = useCategories();
-  const { mutate: deleteCategories, isPending: isDeleting } = useDeleteCategory();
 
   // État pour le modal de suppression
-  const [deleteModal, setDeleteModal] = useState<{
-    isOpen: boolean;
-    categoryIds: number[];
-    categoryName: string;
-  }>({
-    isOpen: false,
-    categoryIds: [],
-    categoryName: ''
-  });
+ 
 
   // Ouvrir le modal de suppression
   const handleDeleteClick = useCallback((id: string) => {
@@ -33,11 +22,7 @@ export default function CategoriesPage() {
     const category = categories?.find(c => c.id === categoryId.toString());
     const categoryName = category?.name || 'category';
 
-    setDeleteModal({
-      isOpen: true,
-      categoryIds: [categoryId],
-      categoryName,
-    });
+   
   }, [categories]);
 
   // Confirmer suppression
@@ -55,11 +40,7 @@ export default function CategoriesPage() {
 //   };
 
   // Fermer le modal
-  const handleCloseModal = () => {
-    if (!isDeleting) {
-      setDeleteModal({ isOpen: false, categoryIds: [], categoryName: '' });
-    }
-  };
+ 
 
   // Filtres
   const filterOptions = useMemo(() => [

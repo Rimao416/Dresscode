@@ -1,7 +1,11 @@
 {
   "$schema": "https://turborepo.org/schema.json",
   "tasks": {
+    "generate": {
+      "outputs": ["generated/**"]
+    },
     "build": {
+      "dependsOn": ["^generate", "^build"],
       "outputs": ["dist/**"]
     },
     "dev": {
